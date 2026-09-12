@@ -6,7 +6,7 @@ hundred Mbps even when the server has plenty of headroom.
 
 What changed:
 
-- `assets/js/app-2.5.4.js`: download/upload threads are spread round-robin across the page origin
+- `assets/js/app-2.5.4-multi.js`: download/upload threads are spread round-robin across the page origin
   plus every port in `multiPorts`, so 4 origins x 6 connections = 24 concurrent streams.
 - `index.html`: `multiPorts = [8081, 8082, 8083]`, `dlThreads = 12`, `ulThreads = 24`,
   100 ms thread stagger. `?xhr=N` (max 32) still overrides the thread count.
