@@ -1114,11 +1114,26 @@ window.onload = function() {
         }
       }
     }
+
+    // meech-io fork: spread parallel XHR threads across several server origins (ports)
+    // so the browser's per-origin limit of ~6 HTTP/1.1 connections stops capping throughput.
+    function threadURL(i, path) {
+      var ports = (typeof multiPorts !== "undefined" && multiPorts) ? multiPorts : [];
+      if (!ports.length || /^https?:\/\//i.test(path) || path.indexOf("//") === 0) {
+        return path;
+      }
+      var origins = [""];
+      for (var k = 0; k < ports.length; k++) {
+        origins.push(location.protocol + "//" + location.hostname + ":" + ports[k] + "/");
+      }
+      var o = origins[i % origins.length];
+      return o ? o + path.replace(/^\//, "") : path;
+    }
     function SendReQ(i) {
       var lastLoaded = 0;
       var OST = new XMLHttpRequest();
       ReQ[i] = OST;
-      ReQ[i].open("GET", fianlPingServer.Download + "?n=" + Math.random(), true);
+      ReQ[i].open("GET", threadURL(i, fianlPingServer.Download) + "?n=" + Math.random(), true);
       ReQ[i].onprogress = function(e) {
         if (stop === 1) {
           ReQ[i].abort();
@@ -1167,7 +1182,7 @@ window.onload = function() {
       var lastULoaded = 0;
       var OST = new XMLHttpRequest();
       uReQ[i] = OST;
-      uReQ[i].open("POST", fianlPingServer.Upload + "?n=" + Math.random(), true);
+      uReQ[i].open("POST", threadURL(i, fianlPingServer.Upload) + "?n=" + Math.random(), true);
       uReQ[i].upload.onprogress = function(e) {
         if (Status == "initup" && some === undefined) {
           var some;

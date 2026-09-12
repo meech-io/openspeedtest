@@ -1,3 +1,31 @@
+# meech-io fork: multi-origin OpenSpeedTest
+
+This fork of [OpenSpeedTest](https://github.com/openspeedtest/Speed-Test) (MIT) removes the
+browser's ~6-connections-per-origin ceiling, which otherwise caps upload speed on Wi-Fi at a few
+hundred Mbps even when the server has plenty of headroom.
+
+What changed:
+
+- `assets/js/app-2.5.4.js`: download/upload threads are spread round-robin across the page origin
+  plus every port in `multiPorts`, so 4 origins x 6 connections = 24 concurrent streams.
+- `index.html`: `multiPorts = [8081, 8082, 8083]`, `dlThreads = 12`, `ulThreads = 16`,
+  100 ms thread stagger. `?xhr=N` (max 32) still overrides the thread count.
+- `docker/OpenSpeedTest-Server.conf`: nginx also listens on 3002-3004, 64 MB upload bodies.
+- `docker/Dockerfile`: layers the above onto the stock `openspeedtest/latest` image.
+
+Run it:
+
+```sh
+docker build -t openspeedtest-multi -f docker/Dockerfile .
+docker run -d --restart unless-stopped --name openspeedtest \
+  -p 80:3000 -p 443:3001 -p 8081:3002 -p 8082:3003 -p 8083:3004 openspeedtest-multi
+```
+
+The extra ports must be reachable from the client at the same hostname the page was loaded from.
+Set `multiPorts = []` in `index.html` to get stock behaviour back.
+
+---
+
 #  **[SpeedTest by OpenSpeedTest™](https://openspeedtest.com?Run&ref=Github)** - Free & Open-Source HTML5 Network Performance Estimation Tool.
 
   
