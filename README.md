@@ -8,7 +8,7 @@ What changed:
 
 - `assets/js/app-2.5.4.js`: download/upload threads are spread round-robin across the page origin
   plus every port in `multiPorts`, so 4 origins x 6 connections = 24 concurrent streams.
-- `index.html`: `multiPorts = [8081, 8082, 8083]`, `dlThreads = 12`, `ulThreads = 16`,
+- `index.html`: `multiPorts = [8081, 8082, 8083]`, `dlThreads = 12`, `ulThreads = 24`,
   100 ms thread stagger. `?xhr=N` (max 32) still overrides the thread count.
 - `docker/OpenSpeedTest-Server.conf`: nginx also listens on 3002-3004, 64 MB upload bodies.
 - `docker/Dockerfile`: layers the above onto the stock `openspeedtest/latest` image.
